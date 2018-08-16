@@ -60,18 +60,20 @@
 </template>
 
 <script>
-  import { getLocalGoods } from '@/utils/goodsStorageTool.js';
+  import { getLocalGoods,updateLocalGoods,deleteLocalGoods } from '@/utils/goodsStorageTool.js';
   export default{
     data(){
       return {
         goodsList:[],
         isEmpty:false,
+        allSelected:true,
       }
     },
     onShow(){
       this.getGoodsList();
     },
     methods:{
+      // 获取本地存储数据
       async getGoodsList(){
         // 获取本地数据
         const localGoods = getLocalGoods();
@@ -91,6 +93,95 @@
         })
         // console.log(result)
         this.goodsList = result.data.message;
+      }
+    // 减法
+    ,substrict(index){
+      if(this.goodsList[index].goods_number<=1){
+        return
+      }
+      this.goodsList[index].goods_number -=1;
+      this.notify(index)
+    }
+    // 加法
+    ,add(index){
+      this.goodsList[index].goods_number+=1;
+      this.notify(index)
+    }
+    // 更新数据
+    ,notify(index){
+      const goods = {
+        goods_id:this.goodsList[index].goods_id,
+        goods_number:this.goodsList[index].goods_number
+      }
+      updateLocalGoods(goods);
+    }
+    
+    // 商品每一项取反
+    ,toggleSelect(index){
+      this.goodsList[index].isSelected !=this.goodsList[index].isSelected ;
+      this.shouldSelectAll();
+    }
+    // 是否该全部选中
+    ,shouldSelectAll(){
+      let selectAll = true;
+      for(var i=0;i<this.goodsList.length;i++){
+        if(!this.goodsList[i].isSelected){
+          selectAll = false;
+          break;
+        }
+       
+      }
+      this.allSelected = selectAll;
+     
+    }
+    // 全选反选
+    ,toggleAllSelect(){      
+      this.goodsList.forEach(goods=>{
+        goods.isSelected = !this.allSelected;
+      })
+      this.allSelected = !this.allSelected;
+    }
+    // 删除商品
+    ,deleteGoods(index){
+      
+      wx.showModal({
+        title: '提示',
+        content: '你确定要删除吗？',
+        confirmColor:'#ff2d4a',
+        success: (res)=> {
+          if (res.confirm) {
+            console.log('用户点击确定')
+            deleteLocalGoods(this.goodsList[index].goods_id);
+            this.goodsList.splice(index,1);
+            this.isEmpty = this.goodsList.length ==0;
+          } else if (res.cancel) {
+            console.log('用户点击取消')
+          }
+        }
+      })
+     
+    }
+  }
+    ,computed:{
+      // 计算总数量
+      getTotalCount(){
+        let totalCount = 0;
+        this.goodsList.forEach(goods=>{
+          if(goods.isSelected){
+            totalCount += goods.goods_number;
+          }
+        })
+        return totalCount;
+      },
+      // 计算总金额
+      getTotalAmount(){
+        let totalPrice = 0;
+        this.goodsList.forEach(goods=>{
+          if(goods.isSelected){
+            totalPrice += goods.goods_number * goods.goods_price;
+          }
+        })
+        return totalPrice;
       }
     }
   }
