@@ -115,32 +115,30 @@
       }
       updateLocalGoods(goods);
     }
-    
-    // 商品每一项取反
+    // 每一项是否否选中
     ,toggleSelect(index){
-      this.goodsList[index].isSelected !=this.goodsList[index].isSelected ;
+      this.goodsList[index].isSelected = ! this.goodsList[index].isSelected;
       this.shouldSelectAll();
     }
-    // 是否该全部选中
+    // 选中所有，全选反选
+    ,toggleAllSelect(){
+      this.goodsList.forEach(goods=>{
+        goods.isSelected = !this.allSelected;
+      })
+      this.allSelected = !this.allSelected;
+    }
+    // 是否应该全选
     ,shouldSelectAll(){
       let selectAll = true;
       for(var i=0;i<this.goodsList.length;i++){
         if(!this.goodsList[i].isSelected){
           selectAll = false;
           break;
-        }
-       
+        }        
       }
-      this.allSelected = selectAll;
-     
+      this.allSelected =selectAll;
     }
-    // 全选反选
-    ,toggleAllSelect(){      
-      this.goodsList.forEach(goods=>{
-        goods.isSelected = !this.allSelected;
-      })
-      this.allSelected = !this.allSelected;
-    }
+   
     // 删除商品
     ,deleteGoods(index){
       
@@ -159,6 +157,19 @@
           }
         }
       })
+     
+    },
+    // 去结算页
+    goToOrder(){
+      const ids=[];
+      this.goodsList.forEach(goods=>{
+        if(goods.isSelected){
+        ids.push(goods.goods_id) 
+      }
+      });
+      if(ids.length===0) return;
+      // console.log(ids)
+      wx.navigateTo({ url: `/pages/pay/main?ids=${ids}` });
      
     }
   }

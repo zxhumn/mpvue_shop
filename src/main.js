@@ -22,12 +22,13 @@ axios.interceptors.request.use(function (config) {
 // 使用Promise
 axios.defaults.adapter  =function (config) {
     // if(config.env==='mp'){
+        // console.log(config)
     return new Promise((resolve,reject)=>{
 
-        // console.log(config)
+      
         wx.request({
             url:config.url,
-            data:config.params,
+            data:config.params?config.params:config.data,
             method:config.method,
             success:function(res){
                 resolve(res)
@@ -44,6 +45,7 @@ axios.defaults.adapter  =function (config) {
 // }
 }
 axios.defaults.baseURL="https://www.zhengzhicheng.cn/";
+// axios.defaults.baseURL = "http://www.127.0.0.1:3306";
 Vue.prototype.$axios = axios;
 
 const app = new Vue(App)
